@@ -1,0 +1,162 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Locality {
+  id        String   @id @default(uuid())
+  name      String   // e.g., "Badlapur"
+  subArea   String?  // e.g., "Katrap", "Shirgaon"
+  city      String   // e.g., "Thane"
+  state     String   // e.g., "Maharashtra"
+  pincode   String
+  lat       Float?
+  lng       Float?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  posts      Post[]
+  groups     Group[]
+  businesses Business[]
+}
+
+model User {
+  id         String   @id @default(uuid())
+  phone      String   @unique
+  name       String
+  email      String?  @unique
+  avatarUrl  String?
+  role       String   @default("member") // e.g., member, admin, moderator
+  localityId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  locality     Locality?     @relation(fields: [localityId], references: [id])
+  posts        Post[]
+  comments     Comment[]
+  likes        Like[]
+  groupMembers GroupMember[]
+}
+
+model Post {
+  id         String   @id @default(uuid())
+  userId     String
+  localityId String
+  title      String
+  content    String
+  category   String   // e.g., "general", "announcement", "alert", "event", "lost_found", "buy_sell", "question", "service"
+  imageUrl   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  locality       Locality         @relation(fields: [localityId], references: [id], onDelete: Cascade)
+  comments       Comment[]
+  likes          Like[]
+  eventDetail    EventDetail?
+  alertDetail    AlertDetail?
+  lostFoundDetail LostFoundDetail?
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  category    String   // e.g., "locality", "society", "interest", "support", "events"
+  localityId  String
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  locality Locality      @relation(fields: [localityId], references: [id], onDelete: Cascade)
+  members  GroupMember[]
+}
+
+model GroupMember {
+  id        String   @id @default(uuid())
+  groupId   String
+  userId    String
+  role      String   @default("member") // e.g., member, admin
+  createdAt DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+}
+
+model EventDetail {
+  id          String   @id @default(uuid())
+  postId      String   @unique
+  eventDate   DateTime
+  location    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model AlertDetail {
+  id        String   @id @default(uuid())
+  postId    String   @unique
+  severity  String   @default("info") // e.g., info, warning, critical
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model LostFoundDetail {
+  id        String   @id @default(uuid())
+  postId    String   @unique
+  type      String   // e.g., "lost", "found"
+  itemName  String
+  reward    String?
+  status    String   @default("open") // e.g., open, resolved
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Business {
+  id          String   @id @default(uuid())
+  name        String
+  category    String   // e.g., "groceries", "medical", "plumber", "electrician", "restaurant"
+  description String?
+  phone       String
+  address     String
+  localityId  String
+  rating      Float    @default(5.0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  locality Locality @relation(fields: [localityId], references: [id], onDelete: Cascade)
+}
