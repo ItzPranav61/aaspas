@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newGroup = await prisma.$transaction(async (tx) => {
+    const newGroup = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const group = await tx.group.create({
         data: {
           name,
