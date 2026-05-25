@@ -18,7 +18,8 @@ import {
   Megaphone,
   Share2,
   Search,
-  X
+  X,
+  Locate
 } from 'lucide-react';
 
 interface Post {
@@ -61,6 +62,28 @@ const categories = [
   { label: 'Question', value: 'question' },
   { label: 'Service', value: 'service' },
 ];
+
+const getLocalityParentName = (loc: Locality): string => {
+  if (loc.parentLocality?.name) {
+    return loc.parentLocality.name;
+  }
+  return loc.name;
+};
+
+const getLocalityDisplayNames = (loc: Locality) => {
+  let mainName = '';
+  let parentName = '';
+
+  if (loc.subArea) {
+    mainName = loc.subArea;
+    parentName = loc.name;
+  } else {
+    mainName = loc.name;
+    parentName = loc.parentLocality?.name || loc.city;
+  }
+
+  return { mainName, parentName };
+};
 
 export default function HomePage() {
   const { user, logout } = useAuth();
@@ -115,21 +138,34 @@ export default function HomePage() {
   });
 
   const filteredLocalities = localities.filter((loc) => {
+    // Filter to child sub-localities (where isSelectable is true/not false)
+    if (loc.isSelectable === false) return false;
+
     const term = localitySearch.toLowerCase().trim();
     if (!term) return true;
-    return (
-      loc.name.toLowerCase().includes(term) ||
-      (loc.subArea && loc.subArea.toLowerCase().includes(term)) ||
-      loc.pincode.includes(term)
-    );
+
+    const nameMatch = loc.name?.toLowerCase().includes(term);
+    const subAreaMatch = loc.subArea?.toLowerCase().includes(term);
+    const pincodeMatch = loc.pincode?.includes(term);
+    const keywordsMatch = loc.searchKeywords?.toLowerCase().includes(term);
+    const parentNameMatch = loc.parentLocality?.name?.toLowerCase().includes(term);
+
+    return nameMatch || subAreaMatch || pincodeMatch || keywordsMatch || parentNameMatch;
   });
 
-  const nearbyAreas = filteredLocalities.filter((loc) => loc.groupName === 'Nearby Areas');
-  const badlapurLocalities = filteredLocalities.filter((loc) => loc.groupName === 'Badlapur Localities');
-  const centralLineAreas = filteredLocalities.filter((loc) => loc.groupName === 'Central Line Areas');
+  // Group the filtered localities by parent city name
+  const groupedLocalitiesMap: Record<string, Locality[]> = {};
+  filteredLocalities.forEach((loc) => {
+    const parentName = getLocalityParentName(loc);
+    if (!groupedLocalitiesMap[parentName]) {
+      groupedLocalitiesMap[parentName] = [];
+    }
+    groupedLocalitiesMap[parentName].push(loc);
+  });
 
   const renderLocalityItem = (loc: Locality) => {
     const isSelected = currentLocality?.id === loc.id;
+    const { mainName, parentName } = getLocalityDisplayNames(loc);
     return (
       <button
         key={loc.id}
@@ -146,10 +182,10 @@ export default function HomePage() {
       >
         <div>
           <span className="text-xs font-bold block">
-            {loc.subArea ? `${loc.subArea}, ` : ''} {loc.name}
+            {mainName}
           </span>
           <p className="text-[9px] text-slate-400 font-normal mt-0.5">
-            Pincode: {loc.pincode} • {loc.city}, {loc.state}
+            {parentName} • Pincode: {loc.pincode}
           </p>
         </div>
         {isSelected && <Check size={14} className="text-brand-green" />}
@@ -630,10 +666,10 @@ export default function HomePage() {
             <div className="text-left mb-4 shrink-0">
               <h3 className="text-lg font-black text-slate-800 mb-1 flex items-center gap-1.5">
                 <MapPin size={18} className="text-brand-green" />
-                Select Your Area
+                Where do you live?
               </h3>
-              <p className="text-slate-450 text-[11px] leading-normal">
-                Choose your locality to see nearby posts, alerts, services, and groups.
+              <p className="text-slate-500 text-xs leading-normal mt-1">
+                Search your locality, society, station, or pincode to personalize Aaspas.
               </p>
             </div>
 
@@ -641,7 +677,7 @@ export default function HomePage() {
             <div className="relative mb-4 shrink-0">
               <input
                 type="text"
-                placeholder="Search area, station, society..."
+                placeholder="Search area, station, society, pincode..."
                 value={localitySearch}
                 onChange={(e) => setLocalitySearch(e.target.value)}
                 className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green text-slate-800 font-semibold"
@@ -657,48 +693,49 @@ export default function HomePage() {
               )}
             </div>
 
+            {/* Use current location button */}
+            <button
+              onClick={() => {
+                alert("Using current location...");
+              }}
+              className="w-full mb-4 py-2.5 px-4 bg-emerald-800 hover:bg-emerald-950 active:scale-98 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-sm shrink-0"
+            >
+              <Locate size={14} className="text-emerald-300" />
+              Use current location
+            </button>
+
             <div className="space-y-4 overflow-y-auto pr-1 flex-1 no-scrollbar pb-6">
-              {/* Badlapur Localities */}
-              {badlapurLocalities.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-[10px] font-black text-brand-deep uppercase tracking-wider text-left pl-1 bg-emerald-50/50 py-1 px-2 rounded-md">
-                    Badlapur Localities
-                  </h4>
-                  <div className="space-y-1.5">
-                    {badlapurLocalities.map((loc) => renderLocalityItem(loc))}
+              {Object.entries(groupedLocalitiesMap).map(([parentName, groupLocalities]) => {
+                const heading = parentName.toLowerCase().endsWith('areas') || parentName.toLowerCase().endsWith('localities')
+                  ? parentName
+                  : `${parentName} Areas`;
+                return (
+                  <div key={parentName} className="space-y-2">
+                    <h4 className="text-[10px] font-black text-brand-deep uppercase tracking-wider text-left pl-1 bg-emerald-50/50 py-1 px-2 rounded-md">
+                      {heading}
+                    </h4>
+                    <div className="space-y-1.5">
+                      {groupLocalities.map((loc) => renderLocalityItem(loc))}
+                    </div>
                   </div>
-                </div>
-              )}
-
-              {/* Nearby Areas */}
-              {nearbyAreas.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-[10px] font-black text-brand-deep uppercase tracking-wider text-left pl-1 bg-emerald-50/50 py-1 px-2 rounded-md">
-                    Nearby Areas
-                  </h4>
-                  <div className="space-y-1.5">
-                    {nearbyAreas.map((loc) => renderLocalityItem(loc))}
-                  </div>
-                </div>
-              )}
-
-              {/* Central Line Areas */}
-              {centralLineAreas.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-[10px] font-black text-brand-deep uppercase tracking-wider text-left pl-1 bg-emerald-50/50 py-1 px-2 rounded-md">
-                    Central Line Areas
-                  </h4>
-                  <div className="space-y-1.5">
-                    {centralLineAreas.map((loc) => renderLocalityItem(loc))}
-                  </div>
-                </div>
-              )}
+                );
+              })}
 
               {filteredLocalities.length === 0 && (
                 <div className="text-center py-8 text-slate-400 text-xs font-semibold">
                   🔍 No matching localities found.
                 </div>
               )}
+
+              {/* Request New Locality Link */}
+              <div className="text-center pt-4 border-t border-slate-100 mt-6">
+                <button
+                  onClick={() => alert("Requesting new locality...")}
+                  className="text-xs text-emerald-700 hover:text-emerald-950 font-bold transition-colors hover:underline"
+                >
+                  Can’t find your area? Request new locality
+                </button>
+              </div>
             </div>
           </div>
         </div>

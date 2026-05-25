@@ -19,6 +19,16 @@ model Locality {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  parentLocalityId String?
+  stateCode        String?
+  citySlug         String?
+  parentSlug       String?
+  isSelectable     Boolean @default(true)
+  searchKeywords   String?
+
+  parentLocality   Locality?  @relation("ParentChild", fields: [parentLocalityId], references: [id], onDelete: Cascade)
+  childLocalities  Locality[] @relation("ParentChild")
+
   users      User[]
   posts      Post[]
   groups     Group[]

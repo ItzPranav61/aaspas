@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 export async function GET() {
   try {
     const localities = await prisma.locality.findMany({
+      include: {
+        parentLocality: true,
+      },
       orderBy: {
         name: "asc",
       },

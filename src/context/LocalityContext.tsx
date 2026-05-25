@@ -14,6 +14,13 @@ export interface Locality {
   lng: number | null;
   country: string;
   groupName: string;
+  parentLocalityId?: string | null;
+  stateCode?: string | null;
+  citySlug?: string | null;
+  parentSlug?: string | null;
+  isSelectable: boolean;
+  searchKeywords?: string | null;
+  parentLocality?: Locality | null;
 }
 
 interface LocalityContextType {
