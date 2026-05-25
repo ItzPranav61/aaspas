@@ -21,10 +21,40 @@ async function main() {
   await prisma.user.deleteMany({});
   await prisma.locality.deleteMany({});
 
-  console.log("Seeding localities...");
+  console.log("Seeding localities hierarchy...");
   
-  // Parent localities (with isSelectable: false)
-  const badlapurParent = await prisma.locality.create({
+  // 1. Root Country
+  const india = await prisma.locality.create({
+    data: {
+      name: "India",
+      subArea: null,
+      city: "",
+      state: "",
+      pincode: "",
+      country: "India",
+      isSelectable: false,
+      groupName: "Countries",
+    }
+  });
+
+  // 2. State
+  const maharashtra = await prisma.locality.create({
+    data: {
+      name: "Maharashtra",
+      subArea: null,
+      city: "",
+      state: "Maharashtra",
+      stateCode: "MH",
+      pincode: "",
+      country: "India",
+      isSelectable: false,
+      parentLocalityId: india.id,
+      groupName: "States",
+    }
+  });
+
+  // 3. Cities under Maharashtra
+  const badlapurCity = await prisma.locality.create({
     data: {
       name: "Badlapur",
       subArea: null,
@@ -33,8 +63,92 @@ async function main() {
       stateCode: "MH",
       citySlug: "badlapur",
       pincode: "421503",
+      country: "India",
       isSelectable: false,
-      groupName: "Badlapur Localities",
+      parentLocalityId: maharashtra.id,
+      groupName: "Cities",
+    }
+  });
+
+  const kalyanCity = await prisma.locality.create({
+    data: {
+      name: "Kalyan",
+      subArea: null,
+      city: "Kalyan",
+      state: "Maharashtra",
+      stateCode: "MH",
+      citySlug: "kalyan",
+      pincode: "421301",
+      country: "India",
+      isSelectable: false,
+      parentLocalityId: maharashtra.id,
+      groupName: "Cities",
+    }
+  });
+
+  const dombivliCity = await prisma.locality.create({
+    data: {
+      name: "Dombivli",
+      subArea: null,
+      city: "Dombivli",
+      state: "Maharashtra",
+      stateCode: "MH",
+      citySlug: "dombivli",
+      pincode: "421202",
+      country: "India",
+      isSelectable: false,
+      parentLocalityId: maharashtra.id,
+      groupName: "Cities",
+    }
+  });
+
+  const ulhasnagarCity = await prisma.locality.create({
+    data: {
+      name: "Ulhasnagar",
+      subArea: null,
+      city: "Ulhasnagar",
+      state: "Maharashtra",
+      stateCode: "MH",
+      citySlug: "ulhasnagar",
+      pincode: "421001",
+      country: "India",
+      isSelectable: false,
+      parentLocalityId: maharashtra.id,
+      groupName: "Cities",
+    }
+  });
+
+  const ambernathCity = await prisma.locality.create({
+    data: {
+      name: "Ambernath",
+      subArea: null,
+      city: "Ambernath",
+      state: "Maharashtra",
+      stateCode: "MH",
+      citySlug: "ambernath",
+      pincode: "421501",
+      country: "India",
+      isSelectable: false,
+      parentLocalityId: maharashtra.id,
+      groupName: "Cities",
+    }
+  });
+
+  // 4. Parent Areas under City
+  const badlapurParent = await prisma.locality.create({
+    data: {
+      name: "Badlapur",
+      subArea: null,
+      city: "Badlapur",
+      state: "Maharashtra",
+      stateCode: "MH",
+      citySlug: "badlapur",
+      parentSlug: "badlapur",
+      pincode: "421503",
+      country: "India",
+      isSelectable: false,
+      parentLocalityId: badlapurCity.id,
+      groupName: "Parent Areas",
     }
   });
 
@@ -46,9 +160,12 @@ async function main() {
       state: "Maharashtra",
       stateCode: "MH",
       citySlug: "kalyan",
+      parentSlug: "kalyan",
       pincode: "421301",
+      country: "India",
       isSelectable: false,
-      groupName: "Nearby Areas",
+      parentLocalityId: kalyanCity.id,
+      groupName: "Parent Areas",
     }
   });
 
@@ -60,9 +177,12 @@ async function main() {
       state: "Maharashtra",
       stateCode: "MH",
       citySlug: "dombivli",
+      parentSlug: "dombivli",
       pincode: "421202",
+      country: "India",
       isSelectable: false,
-      groupName: "Central Line Areas",
+      parentLocalityId: dombivliCity.id,
+      groupName: "Parent Areas",
     }
   });
 
@@ -74,9 +194,12 @@ async function main() {
       state: "Maharashtra",
       stateCode: "MH",
       citySlug: "ulhasnagar",
+      parentSlug: "ulhasnagar",
       pincode: "421001",
+      country: "India",
       isSelectable: false,
-      groupName: "Nearby Areas",
+      parentLocalityId: ulhasnagarCity.id,
+      groupName: "Parent Areas",
     }
   });
 
@@ -88,13 +211,18 @@ async function main() {
       state: "Maharashtra",
       stateCode: "MH",
       citySlug: "ambernath",
+      parentSlug: "ambernath",
       pincode: "421501",
+      country: "India",
       isSelectable: false,
-      groupName: "Nearby Areas",
+      parentLocalityId: ambernathCity.id,
+      groupName: "Parent Areas",
     }
   });
 
-  // Badlapur selectable sub-localities
+  // 5. Selectable Sub-localities (Child localities remain final selectable locations)
+  
+  // Badlapur sub-localities
   const katrap = await prisma.locality.create({
     data: {
       name: "Badlapur",
@@ -107,9 +235,10 @@ async function main() {
       parentLocalityId: badlapurParent.id,
       isSelectable: true,
       pincode: "421503",
+      country: "India",
       lat: 19.1550,
       lng: 73.2500,
-      groupName: "Badlapur Localities",
+      groupName: "Badlapur Areas",
       searchKeywords: "katrap station, badlapur station, katrap park, pipeline road, sector 3",
     }
   });
@@ -126,9 +255,10 @@ async function main() {
       parentLocalityId: badlapurParent.id,
       isSelectable: true,
       pincode: "421503",
+      country: "India",
       lat: 19.1620,
       lng: 73.2380,
-      groupName: "Badlapur Localities",
+      groupName: "Badlapur Areas",
       searchKeywords: "shirgaon station, badlapur station, shirgaon ground, shivaji chowk",
     }
   });
@@ -145,9 +275,10 @@ async function main() {
       parentLocalityId: badlapurParent.id,
       isSelectable: true,
       pincode: "421503",
+      country: "India",
       lat: 19.1440,
       lng: 73.2280,
-      groupName: "Badlapur Localities",
+      groupName: "Badlapur Areas",
       searchKeywords: "kulgaon badlapur, kulgaon station, badlapur west",
     }
   });
@@ -164,9 +295,10 @@ async function main() {
       parentLocalityId: badlapurParent.id,
       isSelectable: true,
       pincode: "421503",
+      country: "India",
       lat: 19.1520,
       lng: 73.2250,
-      groupName: "Badlapur Localities",
+      groupName: "Badlapur Areas",
       searchKeywords: "rameshwadi badlapur, rameshwadi station road",
     }
   });
@@ -183,9 +315,10 @@ async function main() {
       parentLocalityId: badlapurParent.id,
       isSelectable: true,
       pincode: "421503",
+      country: "India",
       lat: 19.1380,
       lng: 73.2340,
-      groupName: "Badlapur Localities",
+      groupName: "Badlapur Areas",
       searchKeywords: "belavali badlapur, belavali west",
     }
   });
@@ -202,17 +335,18 @@ async function main() {
       parentLocalityId: badlapurParent.id,
       isSelectable: true,
       pincode: "421503",
+      country: "India",
       lat: 19.1650,
       lng: 73.2200,
-      groupName: "Badlapur Localities",
+      groupName: "Badlapur Areas",
       searchKeywords: "manjarli badlapur, manjarli bridge",
     }
   });
 
   const badlapurEast = await prisma.locality.create({
     data: {
-      name: "Badlapur East",
-      subArea: null,
+      name: "Badlapur",
+      subArea: "Badlapur East",
       city: "Badlapur",
       state: "Maharashtra",
       stateCode: "MH",
@@ -221,17 +355,18 @@ async function main() {
       parentLocalityId: badlapurParent.id,
       isSelectable: true,
       pincode: "421503",
+      country: "India",
       lat: 19.1500,
       lng: 73.2450,
-      groupName: "Badlapur Localities",
+      groupName: "Badlapur Areas",
       searchKeywords: "badlapur east station, badlapur station, katrap bypass, gandhi chowk",
     }
   });
 
   const badlapurWest = await prisma.locality.create({
     data: {
-      name: "Badlapur West",
-      subArea: null,
+      name: "Badlapur",
+      subArea: "Badlapur West",
       city: "Badlapur",
       state: "Maharashtra",
       stateCode: "MH",
@@ -240,18 +375,19 @@ async function main() {
       parentLocalityId: badlapurParent.id,
       isSelectable: true,
       pincode: "421503",
+      country: "India",
       lat: 19.1450,
       lng: 73.2300,
-      groupName: "Badlapur Localities",
+      groupName: "Badlapur Areas",
       searchKeywords: "badlapur west station, station road badlapur west, belavali",
     }
   });
 
-  // Kalyan selectable sub-localities
+  // Kalyan sub-localities
   const kalyanEast = await prisma.locality.create({
     data: {
-      name: "Kalyan East",
-      subArea: null,
+      name: "Kalyan",
+      subArea: "Kalyan East",
       city: "Kalyan",
       state: "Maharashtra",
       stateCode: "MH",
@@ -260,17 +396,18 @@ async function main() {
       parentLocalityId: kalyanParent.id,
       isSelectable: true,
       pincode: "421306",
+      country: "India",
       lat: 19.2300,
       lng: 73.1400,
-      groupName: "Nearby Areas",
+      groupName: "Kalyan Areas",
       searchKeywords: "kalyan east station, lokgram, pisavali, chinchpada",
     }
   });
 
   const kalyanWest = await prisma.locality.create({
     data: {
-      name: "Kalyan West",
-      subArea: null,
+      name: "Kalyan",
+      subArea: "Kalyan West",
       city: "Kalyan",
       state: "Maharashtra",
       stateCode: "MH",
@@ -279,17 +416,18 @@ async function main() {
       parentLocalityId: kalyanParent.id,
       isSelectable: true,
       pincode: "421301",
+      country: "India",
       lat: 19.2402,
       lng: 73.1302,
-      groupName: "Nearby Areas",
+      groupName: "Kalyan Areas",
       searchKeywords: "kalyan west station, station road kalyan, lal chowki, syndicate",
     }
   });
 
   const shahad = await prisma.locality.create({
     data: {
-      name: "Shahad",
-      subArea: null,
+      name: "Kalyan",
+      subArea: "Shahad",
       city: "Kalyan",
       state: "Maharashtra",
       stateCode: "MH",
@@ -298,9 +436,10 @@ async function main() {
       parentLocalityId: kalyanParent.id,
       isSelectable: true,
       pincode: "421103",
+      country: "India",
       lat: 19.2510,
       lng: 73.1450,
-      groupName: "Nearby Areas",
+      groupName: "Kalyan Areas",
       searchKeywords: "shahad station, shahad kalyan, birla mandir, Century Rayon",
     }
   });
@@ -317,9 +456,10 @@ async function main() {
       parentLocalityId: kalyanParent.id,
       isSelectable: true,
       pincode: "421301",
+      country: "India",
       lat: 19.2580,
       lng: 73.1390,
-      groupName: "Nearby Areas",
+      groupName: "Kalyan Areas",
       searchKeywords: "khadakpada kalyan, khadakpada chowk, birla college road",
     }
   });
@@ -336,18 +476,19 @@ async function main() {
       parentLocalityId: kalyanParent.id,
       isSelectable: true,
       pincode: "421301",
+      country: "India",
       lat: 19.2500,
       lng: 73.1320,
-      groupName: "Nearby Areas",
+      groupName: "Kalyan Areas",
       searchKeywords: "chikan ghar kalyan, chikan ghar chowk, birla college",
     }
   });
 
-  // Dombivli selectable sub-localities
+  // Dombivli sub-localities
   const dombivliEast = await prisma.locality.create({
     data: {
-      name: "Dombivli East",
-      subArea: null,
+      name: "Dombivli",
+      subArea: "Dombivli East",
       city: "Dombivli",
       state: "Maharashtra",
       stateCode: "MH",
@@ -356,17 +497,18 @@ async function main() {
       parentLocalityId: dombivliParent.id,
       isSelectable: true,
       pincode: "421201",
+      country: "India",
       lat: 19.2183,
       lng: 73.0878,
-      groupName: "Central Line Areas",
+      groupName: "Dombivli Areas",
       searchKeywords: "dombivli east station, phadke road, manpada, ramnagar",
     }
   });
 
   const dombivliWest = await prisma.locality.create({
     data: {
-      name: "Dombivli West",
-      subArea: null,
+      name: "Dombivli",
+      subArea: "Dombivli West",
       city: "Dombivli",
       state: "Maharashtra",
       stateCode: "MH",
@@ -375,17 +517,18 @@ async function main() {
       parentLocalityId: dombivliParent.id,
       isSelectable: true,
       pincode: "421202",
+      country: "India",
       lat: 19.2150,
       lng: 73.0750,
-      groupName: "Central Line Areas",
+      groupName: "Dombivli Areas",
       searchKeywords: "dombivli west station, gupte road, din dayal road, shastri nagar",
     }
   });
 
   const thakurli = await prisma.locality.create({
     data: {
-      name: "Thakurli",
-      subArea: null,
+      name: "Dombivli",
+      subArea: "Thakurli",
       city: "Dombivli",
       state: "Maharashtra",
       stateCode: "MH",
@@ -394,18 +537,19 @@ async function main() {
       parentLocalityId: dombivliParent.id,
       isSelectable: true,
       pincode: "421201",
+      country: "India",
       lat: 19.2240,
       lng: 73.1040,
-      groupName: "Central Line Areas",
+      groupName: "Dombivli Areas",
       searchKeywords: "thakurli station, thakurli east, thakurli west, 90 feet road",
     }
   });
 
-  // Ulhasnagar selectable sub-localities
+  // Ulhasnagar sub-localities
   const ulhasnagarCamp1 = await prisma.locality.create({
     data: {
-      name: "Ulhasnagar Camp 1",
-      subArea: null,
+      name: "Ulhasnagar",
+      subArea: "Ulhasnagar Camp 1",
       city: "Ulhasnagar",
       state: "Maharashtra",
       stateCode: "MH",
@@ -414,17 +558,18 @@ async function main() {
       parentLocalityId: ulhasnagarParent.id,
       isSelectable: true,
       pincode: "421001",
+      country: "India",
       lat: 19.2215,
       lng: 73.1644,
-      groupName: "Nearby Areas",
+      groupName: "Ulhasnagar Areas",
       searchKeywords: "ulhasnagar camp 1, camp 1 market, gol maidan, birla temple",
     }
   });
 
   const ulhasnagarCamp2 = await prisma.locality.create({
     data: {
-      name: "Ulhasnagar Camp 2",
-      subArea: null,
+      name: "Ulhasnagar",
+      subArea: "Ulhasnagar Camp 2",
       city: "Ulhasnagar",
       state: "Maharashtra",
       stateCode: "MH",
@@ -433,17 +578,18 @@ async function main() {
       parentLocalityId: ulhasnagarParent.id,
       isSelectable: true,
       pincode: "421002",
+      country: "India",
       lat: 19.2200,
       lng: 73.1600,
-      groupName: "Nearby Areas",
+      groupName: "Ulhasnagar Areas",
       searchKeywords: "ulhasnagar camp 2, camp 2 market, chowk",
     }
   });
 
   const ulhasnagarCamp3 = await prisma.locality.create({
     data: {
-      name: "Ulhasnagar Camp 3",
-      subArea: null,
+      name: "Ulhasnagar",
+      subArea: "Ulhasnagar Camp 3",
       city: "Ulhasnagar",
       state: "Maharashtra",
       stateCode: "MH",
@@ -452,17 +598,18 @@ async function main() {
       parentLocalityId: ulhasnagarParent.id,
       isSelectable: true,
       pincode: "421003",
+      country: "India",
       lat: 19.2150,
       lng: 73.1550,
-      groupName: "Nearby Areas",
+      groupName: "Ulhasnagar Areas",
       searchKeywords: "ulhasnagar camp 3, ulhasnagar station, camp 3 market, CHM college",
     }
   });
 
   const ulhasnagarCamp4 = await prisma.locality.create({
     data: {
-      name: "Ulhasnagar Camp 4",
-      subArea: null,
+      name: "Ulhasnagar",
+      subArea: "Ulhasnagar Camp 4",
       city: "Ulhasnagar",
       state: "Maharashtra",
       stateCode: "MH",
@@ -471,17 +618,18 @@ async function main() {
       parentLocalityId: ulhasnagarParent.id,
       isSelectable: true,
       pincode: "421004",
+      country: "India",
       lat: 19.2100,
       lng: 73.1680,
-      groupName: "Nearby Areas",
+      groupName: "Ulhasnagar Areas",
       searchKeywords: "ulhasnagar camp 4, camp 4 market, netaji chowk, maratha section",
     }
   });
 
   const ulhasnagarCamp5 = await prisma.locality.create({
     data: {
-      name: "Ulhasnagar Camp 5",
-      subArea: null,
+      name: "Ulhasnagar",
+      subArea: "Ulhasnagar Camp 5",
       city: "Ulhasnagar",
       state: "Maharashtra",
       stateCode: "MH",
@@ -490,17 +638,18 @@ async function main() {
       parentLocalityId: ulhasnagarParent.id,
       isSelectable: true,
       pincode: "421005",
+      country: "India",
       lat: 19.2050,
       lng: 73.1750,
-      groupName: "Nearby Areas",
+      groupName: "Ulhasnagar Areas",
       searchKeywords: "ulhasnagar camp 5, ot section, camp 5 market, Bhatia chowk",
     }
   });
 
   const vithalwadi = await prisma.locality.create({
     data: {
-      name: "Vithalwadi",
-      subArea: null,
+      name: "Ulhasnagar",
+      subArea: "Vithalwadi",
       city: "Ulhasnagar",
       state: "Maharashtra",
       stateCode: "MH",
@@ -509,10 +658,52 @@ async function main() {
       parentLocalityId: ulhasnagarParent.id,
       isSelectable: true,
       pincode: "421003",
+      country: "India",
       lat: 19.2260,
       lng: 73.1490,
-      groupName: "Nearby Areas",
+      groupName: "Ulhasnagar Areas",
       searchKeywords: "vithalwadi station, vithalwadi ulhasnagar, vithalwadi bridge",
+    }
+  });
+
+  // Ambernath sub-localities
+  const ambernathEast = await prisma.locality.create({
+    data: {
+      name: "Ambernath",
+      subArea: "Ambernath East",
+      city: "Ambernath",
+      state: "Maharashtra",
+      stateCode: "MH",
+      citySlug: "ambernath",
+      parentSlug: "ambernath",
+      parentLocalityId: ambernathParent.id,
+      isSelectable: true,
+      pincode: "421501",
+      country: "India",
+      lat: 19.1980,
+      lng: 73.2010,
+      groupName: "Ambernath Areas",
+      searchKeywords: "ambernath east station, station road, morivali, heringer park",
+    }
+  });
+
+  const ambernathWest = await prisma.locality.create({
+    data: {
+      name: "Ambernath",
+      subArea: "Ambernath West",
+      city: "Ambernath",
+      state: "Maharashtra",
+      stateCode: "MH",
+      citySlug: "ambernath",
+      parentSlug: "ambernath",
+      parentLocalityId: ambernathParent.id,
+      isSelectable: true,
+      pincode: "421505",
+      country: "India",
+      lat: 19.2020,
+      lng: 73.1850,
+      groupName: "Ambernath Areas",
+      searchKeywords: "ambernath west station, kansai, B-cabin, spg park",
     }
   });
 

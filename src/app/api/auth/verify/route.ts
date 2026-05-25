@@ -33,8 +33,10 @@ export async function POST(request: NextRequest) {
     }
 
     // User does not exist, let's create a new one.
-    // Query the first locality as the default locality
-    const defaultLocality = await prisma.locality.findFirst();
+    // Query the first selectable locality as the default locality
+    const defaultLocality = await prisma.locality.findFirst({
+      where: { isSelectable: true }
+    });
     const localityId = defaultLocality ? defaultLocality.id : null;
 
     const suffix = phone.slice(-4);

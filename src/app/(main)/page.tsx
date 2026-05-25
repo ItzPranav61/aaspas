@@ -149,8 +149,11 @@ export default function HomePage() {
     const pincodeMatch = loc.pincode?.includes(term);
     const keywordsMatch = loc.searchKeywords?.toLowerCase().includes(term);
     const parentNameMatch = loc.parentLocality?.name?.toLowerCase().includes(term);
+    const cityMatch = loc.city?.toLowerCase().includes(term);
+    const stateMatch = loc.state?.toLowerCase().includes(term);
+    const countryMatch = loc.country?.toLowerCase().includes(term);
 
-    return nameMatch || subAreaMatch || pincodeMatch || keywordsMatch || parentNameMatch;
+    return nameMatch || subAreaMatch || pincodeMatch || keywordsMatch || parentNameMatch || cityMatch || stateMatch || countryMatch;
   });
 
   // Group the filtered localities by parent city name
