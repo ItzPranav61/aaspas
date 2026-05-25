@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Business" ADD COLUMN     "isFeatured" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isPromoted" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "leadsCount" INTEGER NOT NULL DEFAULT 0;

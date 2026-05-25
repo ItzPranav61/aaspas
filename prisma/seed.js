@@ -407,61 +407,95 @@ async function main() {
 
   await prisma.business.create({
     data: {
-      name: "Priya Medical Store",
-      category: "medical",
-      description: "All prescription medicines, baby care products, health supplements and wellness items available. Home delivery in Katrap.",
+      name: "Priya Academy & Tutors",
+      category: "tutor",
+      description: "Personalized home tuitions and group classes for Mathematics, Science, and English. Grades 5-10. Excellent results.",
       phone: "9876543214",
       address: "Shop No. 3, Katrap Road, Badlapur East",
       localityId: katrap.id,
-      rating: 4.8,
+      rating: 4.9,
+      isFeatured: true,
+      leadsCount: 12,
     }
   });
 
   await prisma.business.create({
     data: {
-      name: "Rajesh Grocers",
-      category: "groceries",
-      description: "Daily fresh grains, pulses, dairy products, spices, and general household essentials. Best wholesale rates in Badlapur.",
+      name: "Shirgaon Fitness Gym",
+      category: "gym",
+      description: "Modern fitness center with certified trainers, strength training equipment, and cardio section. Special packages.",
       phone: "9876543213",
       address: "Shivaji Chowk, Shirgaon Road, Badlapur East",
       localityId: shirgaon.id,
-      rating: 4.6,
+      rating: 4.7,
+      isPromoted: true,
+      leadsCount: 8,
     }
   });
 
   await prisma.business.create({
     data: {
-      name: "Badlapur Electric Repair",
+      name: "Apex Electric Repair & Wiring",
       category: "electrician",
       description: "Repairs for all home appliances, wiring, fans, geysers, and emergency electric faults. Reliable local service.",
       phone: "9876543220",
       address: "Station Area, Badlapur West",
       localityId: badlapur.id,
       rating: 4.5,
+      isFeatured: true,
     }
   });
 
   await prisma.business.create({
     data: {
-      name: "Katrap Plumbing Services",
+      name: "Katrap plumbing Services",
       category: "plumber",
-      description: "Leaks, water tank cleaning, blockage cleaning, pipe replacement, and bathroom fittings. Fast emergency visits.",
+      description: "Leak detection, water tank cleaning, blockage cleaning, pipe replacement, and bathroom fittings. Fast emergency visits.",
       phone: "9876543221",
       address: "Katrap Bypass Road, Badlapur East",
       localityId: katrap.id,
-      rating: 4.7,
+      rating: 4.6,
+      isPromoted: false,
     }
   });
 
   await prisma.business.create({
     data: {
-      name: "Badlapur Fast Bites",
-      category: "restaurant",
-      description: "Vada Pav, Misal Pav, Sabudana Khichdi, and authentic Maharashtrian snacks. Freshly prepared, hygienic and tasty.",
+      name: "Joshi & Associates (CA)",
+      category: "ca",
+      description: "Taxation services, income tax returns, audit assistance, financial planning, and GST consultation for local small businesses.",
       phone: "9876543222",
       address: "Gandhi Chowk, Badlapur East",
       localityId: badlapur.id,
+      rating: 4.8,
+      isFeatured: false,
+    }
+  });
+
+  await prisma.business.create({
+    data: {
+      name: "PixelCraft Photography",
+      category: "photographer",
+      description: "Professional portfolio shoots, pre-wedding events, birthdays, and product photography. High quality studio services.",
+      phone: "9876543223",
+      address: "Katrap Lake View road, Badlapur East",
+      localityId: katrap.id,
       rating: 4.9,
+      isPromoted: true,
+      leadsCount: 15,
+    }
+  });
+
+  await prisma.business.create({
+    data: {
+      name: "Dynamic Auto & Bike Mechanic",
+      category: "mechanic",
+      description: "Two-wheeler and four-wheeler repairs, oil change, engine tuning, brake repairs, and breakdown towing assistance.",
+      phone: "9876543224",
+      address: "Shirgaon bypass road, Badlapur East",
+      localityId: shirgaon.id,
+      rating: 4.4,
+      isFeatured: true,
     }
   });
 

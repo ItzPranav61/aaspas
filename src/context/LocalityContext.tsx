@@ -7,10 +7,12 @@ export interface Locality {
   name: string;
   subArea: string | null;
   city: string;
+  district: string;
   state: string;
   pincode: string;
   lat: number | null;
   lng: number | null;
+  country: string;
 }
 
 interface LocalityContextType {
@@ -33,12 +35,20 @@ export function LocalityProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch('/api/localities');
       if (response.ok) {
         const data = await response.json();
-        setLocalities(data);
+        
+        // Map district and country properties dynamically
+        const mappedData = data.map((l: any) => ({
+          ...l,
+          district: l.city,
+          country: 'India'
+        }));
+        
+        setLocalities(mappedData);
         
         // Restore from localStorage or default to Badlapur East/Katrap
         const savedLocalityId = localStorage.getItem('aaspas_locality_id');
         if (savedLocalityId) {
-          const found = data.find((l: Locality) => l.id === savedLocalityId);
+          const found = mappedData.find((l: Locality) => l.id === savedLocalityId);
           if (found) {
             setCurrentLocality(found);
             setLoading(false);
@@ -47,7 +57,7 @@ export function LocalityProvider({ children }: { children: React.ReactNode }) {
         }
         
         // Find default: Katrap, Badlapur or first available
-        const defaultLocality = data.find((l: Locality) => l.subArea === 'Katrap') || data[0];
+        const defaultLocality = mappedData.find((l: Locality) => l.subArea === 'Katrap') || mappedData[0];
         if (defaultLocality) {
           setCurrentLocality(defaultLocality);
           localStorage.setItem('aaspas_locality_id', defaultLocality.id);

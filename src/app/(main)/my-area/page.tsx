@@ -6,14 +6,17 @@ import {
   MapPin,
   Compass,
   Store,
-  Activity,
   Wrench,
   Zap,
-  Coffee,
   PhoneCall,
   Star,
   Map,
-  X
+  X,
+  BookOpen,
+  Camera,
+  Briefcase,
+  Dumbbell,
+  Hammer
 } from 'lucide-react';
 
 interface Business {
@@ -25,6 +28,9 @@ interface Business {
   address: string;
   localityId: string;
   rating: number;
+  isPromoted: boolean;
+  isFeatured: boolean;
+  leadsCount: number;
 }
 
 interface Stats {
@@ -47,11 +53,13 @@ export default function MyAreaPage() {
   const [callingBusiness, setCallingBusiness] = useState<Business | null>(null);
 
   const directoryCategories = [
-    { label: 'Groceries', value: 'groceries', icon: Store, color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-    { label: 'Medical', value: 'medical', icon: Activity, color: 'bg-red-50 text-red-600 border-red-100' },
-    { label: 'Plumbers', value: 'plumber', icon: Wrench, color: 'bg-blue-50 text-blue-600 border-blue-100' },
-    { label: 'Electricians', value: 'electrician', icon: Zap, color: 'bg-amber-50 text-amber-600 border-amber-100' },
-    { label: 'Restaurants', value: 'restaurant', icon: Coffee, color: 'bg-purple-50 text-purple-600 border-purple-100' },
+    { label: 'Electrician', value: 'electrician', icon: Zap, color: 'bg-amber-50 text-amber-600 border-amber-100' },
+    { label: 'Tutor', value: 'tutor', icon: BookOpen, color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+    { label: 'Photographer', value: 'photographer', icon: Camera, color: 'bg-pink-50 text-pink-600 border-pink-100' },
+    { label: 'CA', value: 'ca', icon: Briefcase, color: 'bg-blue-50 text-blue-600 border-blue-100' },
+    { label: 'Gym', value: 'gym', icon: Dumbbell, color: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
+    { label: 'Plumber', value: 'plumber', icon: Wrench, color: 'bg-sky-50 text-sky-600 border-sky-100' },
+    { label: 'Mechanic', value: 'mechanic', icon: Hammer, color: 'bg-orange-50 text-orange-600 border-orange-100' },
   ];
 
   // Fetch local area statistics
@@ -111,6 +119,17 @@ export default function MyAreaPage() {
       fetchBusinesses(activeCategory);
     }
   }, [currentLocality, activeCategory, fetchAreaStats, fetchBusinesses]);
+
+  const handleCallClick = async (biz: Business) => {
+    setCallingBusiness(biz);
+    try {
+      await fetch(`/api/businesses/${biz.id}/lead`, {
+        method: 'POST',
+      });
+    } catch (err) {
+      console.error('Failed to log lead call:', err);
+    }
+  };
 
   const handleCategoryClick = (catVal: string) => {
     if (activeCategory === catVal) {
@@ -184,7 +203,7 @@ export default function MyAreaPage() {
           Neighborhood Directory
         </h3>
 
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-4 gap-2">
           {directoryCategories.map((cat) => {
             const Icon = cat.icon;
             const isSelected = activeCategory === cat.value;
@@ -196,7 +215,7 @@ export default function MyAreaPage() {
                 className={`flex flex-col items-center justify-center p-2 rounded-2xl border text-center transition-all ${
                   isSelected
                     ? 'bg-brand-deep border-brand-deep text-white scale-[1.03] shadow-md shadow-emerald-950/15'
-                    : 'bg-white border-slate-100 hover:border-slate-200 text-slate-650'
+                    : 'bg-white border-slate-100 hover:border-slate-200 text-slate-600'
                 }`}
               >
                 <div className={`p-2 rounded-xl mb-1.5 shrink-0 ${isSelected ? 'bg-white/20 text-white' : cat.color}`}>
@@ -245,47 +264,67 @@ export default function MyAreaPage() {
               </p>
             </div>
           ) : (
-            businesses.map((biz) => (
-              <div
-                key={biz.id}
-                className="card-premium p-4 border border-slate-100 bg-white shadow-xs flex flex-col gap-2.5"
-              >
-                {/* Biz Header */}
-                <div className="flex justify-between items-start gap-2">
-                  <div className="text-left space-y-0.5">
-                    <h4 className="text-xs font-extrabold text-slate-800">{biz.name}</h4>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{biz.category}</p>
-                  </div>
-                  {/* Rating */}
-                  <div className="flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg px-2 py-0.5 text-[10px] font-bold">
-                    <Star size={10} fill="currentColor" />
-                    <span>{biz.rating.toFixed(1)}</span>
-                  </div>
-                </div>
+            businesses.map((biz) => {
+              const borderStyle = biz.isPromoted 
+                ? 'border-emerald-300 bg-emerald-50/5 shadow-xs' 
+                : biz.isFeatured 
+                ? 'border-amber-200 shadow-xs' 
+                : 'border-slate-100 bg-white shadow-2xs';
 
-                {/* Biz Details */}
-                <div className="text-left space-y-1">
-                  {biz.description && (
-                    <p className="text-xs text-slate-500 leading-normal">{biz.description}</p>
-                  )}
-                  <p className="text-[11px] text-slate-650 font-medium leading-normal flex items-start gap-1">
-                    <MapPin size={12} className="text-slate-400 shrink-0 mt-0.5" />
-                    <span>{biz.address}</span>
-                  </p>
-                </div>
+              return (
+                <div
+                  key={biz.id}
+                  className={`card-premium p-4 border flex flex-col gap-2.5 transition-all ${borderStyle}`}
+                >
+                  {/* Biz Header */}
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="text-left space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="text-xs font-extrabold text-slate-800">{biz.name}</h4>
+                        {biz.isPromoted && (
+                          <span className="bg-emerald-100 text-emerald-800 text-[8px] font-black tracking-wider px-1.5 py-0.5 rounded-md uppercase">
+                            Promoted
+                          </span>
+                        )}
+                        {biz.isFeatured && (
+                          <span className="bg-amber-100 text-amber-800 text-[8px] font-black tracking-wider px-1.5 py-0.5 rounded-md uppercase flex items-center gap-0.5">
+                            ⭐ Featured
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{biz.category}</p>
+                    </div>
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg px-2 py-0.5 text-[10px] font-bold">
+                      <Star size={10} fill="currentColor" />
+                      <span>{biz.rating.toFixed(1)}</span>
+                    </div>
+                  </div>
 
-                {/* Dialer trigger button */}
-                <div className="border-t border-slate-50 pt-2.5 mt-0.5 flex justify-end">
-                  <button
-                    onClick={() => setCallingBusiness(biz)}
-                    className="flex items-center gap-1 bg-brand-green hover:bg-brand-accent text-white py-1.5 px-3.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-brand-green/20"
-                  >
-                    <PhoneCall size={12} />
-                    Call
-                  </button>
+                  {/* Biz Details */}
+                  <div className="text-left space-y-1">
+                    {biz.description && (
+                      <p className="text-xs text-slate-500 leading-normal">{biz.description}</p>
+                    )}
+                    <p className="text-[11px] text-slate-650 font-medium leading-normal flex items-start gap-1">
+                      <MapPin size={12} className="text-slate-400 shrink-0 mt-0.5" />
+                      <span>{biz.address}</span>
+                    </p>
+                  </div>
+
+                  {/* Dialer trigger button */}
+                  <div className="border-t border-slate-50 pt-2.5 mt-0.5 flex justify-end">
+                    <button
+                      onClick={() => handleCallClick(biz)}
+                      className="flex items-center gap-1 bg-brand-green hover:bg-brand-accent text-white py-1.5 px-3.5 rounded-xl text-xs font-bold transition-all shadow-md shadow-brand-green/20"
+                    >
+                      <PhoneCall size={12} />
+                      Call
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

@@ -338,7 +338,7 @@ export default function GroupsPage() {
                 <label className="text-xs font-bold text-slate-500 block">Group Name</label>
                 <input
                   type="text"
-                  placeholder="e.g. Badlapur Hiking Society"
+                  placeholder={`e.g. ${currentLocality?.name || 'Local'} Hiking Society`}
                   value={newGroupName}
                   onChange={(e) => setNewGroupName(e.target.value)}
                   className="block w-full px-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green text-slate-800 font-semibold"

@@ -149,12 +149,15 @@ model LostFoundDetail {
 model Business {
   id          String   @id @default(uuid())
   name        String
-  category    String   // e.g., "groceries", "medical", "plumber", "electrician", "restaurant"
+  category    String   // e.g., "groceries", "medical", "plumber", "electrician", "restaurant", "tutor", "photographer", "ca", "gym", "mechanic"
   description String?
   phone       String
   address     String
   localityId  String
   rating      Float    @default(5.0)
+  isPromoted  Boolean  @default(false)
+  isFeatured  Boolean  @default(false)
+  leadsCount  Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

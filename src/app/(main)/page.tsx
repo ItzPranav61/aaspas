@@ -51,13 +51,13 @@ interface Post {
 
 const categories = [
   { label: 'All', value: 'all' },
-  { label: 'Alerts', value: 'alert' },
-  { label: 'Announcements', value: 'announcement' },
-  { label: 'Events', value: 'event' },
+  { label: 'Alert', value: 'alert' },
+  { label: 'Announcement', value: 'announcement' },
+  { label: 'Event', value: 'event' },
   { label: 'Lost & Found', value: 'lost_found' },
-  { label: 'Buy & Sell', value: 'buy_sell' },
-  { label: 'Questions', value: 'question' },
-  { label: 'Services', value: 'service' },
+  { label: 'Buy/Sell', value: 'buy_sell' },
+  { label: 'Question', value: 'question' },
+  { label: 'Service', value: 'service' },
 ];
 
 export default function HomePage() {
@@ -77,10 +77,7 @@ export default function HomePage() {
     if (!currentLocality) return;
     setLoadingPosts(true);
     try {
-      const catObj = categories.find((c) => c.label === activeTab);
-      const catParam = catObj ? catObj.value : 'all';
-      
-      const res = await fetch(`/api/posts?localityId=${currentLocality.id}&category=${catParam}`);
+      const res = await fetch(`/api/posts?localityId=${currentLocality.id}&category=all`);
       if (res.ok) {
         const data: Post[] = await res.json();
         setPosts(data);
@@ -100,7 +97,19 @@ export default function HomePage() {
     } finally {
       setLoadingPosts(false);
     }
-  }, [currentLocality, activeTab, user]);
+  }, [currentLocality, user]);
+
+  const alertsCount = posts.filter((p) => p.category === 'alert').length;
+  const eventsCount = posts.filter((p) => p.category === 'event').length;
+  const discussionsCount = posts.filter((p) => ['announcement', 'question', 'general'].includes(p.category)).length;
+  const buysellCount = posts.filter((p) => p.category === 'buy_sell').length;
+
+  const filteredPosts = posts.filter((post) => {
+    if (activeTab === 'All') return true;
+    const catObj = categories.find((c) => c.label === activeTab);
+    const catParam = catObj ? catObj.value : 'all';
+    return post.category === catParam;
+  });
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -288,6 +297,71 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* Dynamic Locality Hero Card */}
+      <div className="px-4 mt-3 animate-fade-in">
+        <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 text-white rounded-3xl p-5 shadow-lg shadow-emerald-950/20 border border-emerald-700/35 flex flex-col space-y-4">
+          <div className="flex flex-col space-y-0.5 text-left">
+            <h2 className="text-lg font-black tracking-tight">
+              Good Morning, {currentLocality?.subArea || currentLocality?.name || 'Neighbor'}
+            </h2>
+            <p className="text-xs text-emerald-250 font-medium">
+              What's happening nearby
+            </p>
+          </div>
+
+          <div className="border-t border-emerald-800/40 my-1"></div>
+
+          <div className="space-y-2">
+            <p className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 flex items-center gap-1">
+              <span>📍 Around You Today</span>
+            </p>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              <div className="bg-white/10 hover:bg-white/15 transition-all p-3 rounded-2xl flex items-center gap-2.5 border border-white/5">
+                <span className="text-lg">⚠️</span>
+                <div className="text-left leading-none">
+                  <span className="text-[10px] text-emerald-200 font-bold block">Local Alerts</span>
+                  <span className="text-sm font-black mt-1 block">{alertsCount}</span>
+                </div>
+              </div>
+
+              <div className="bg-white/10 hover:bg-white/15 transition-all p-3 rounded-2xl flex items-center gap-2.5 border border-white/5">
+                <span className="text-lg">🎉</span>
+                <div className="text-left leading-none">
+                  <span className="text-[10px] text-emerald-200 font-bold block">Events Nearby</span>
+                  <span className="text-sm font-black mt-1 block">{eventsCount}</span>
+                </div>
+              </div>
+
+              <div className="bg-white/10 hover:bg-white/15 transition-all p-3 rounded-2xl flex items-center gap-2.5 border border-white/5">
+                <span className="text-lg">💬</span>
+                <div className="text-left leading-none">
+                  <span className="text-[10px] text-emerald-200 font-bold block">Discussions</span>
+                  <span className="text-sm font-black mt-1 block">{discussionsCount}</span>
+                </div>
+              </div>
+
+              <div className="bg-white/10 hover:bg-white/15 transition-all p-3 rounded-2xl flex items-center gap-2.5 border border-white/5">
+                <span className="text-lg">🛒</span>
+                <div className="text-left leading-none">
+                  <span className="text-[10px] text-emerald-200 font-bold block">Buy/Sell Listings</span>
+                  <span className="text-sm font-black mt-1 block">{buysellCount}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Local Summary Section */}
+          <div className="bg-emerald-900/60 p-3 rounded-2xl border border-emerald-800/50 text-[11px] text-emerald-100/90 leading-relaxed text-left">
+            💡 <span className="font-extrabold text-white">Local Summary:</span> {
+              alertsCount > 0 
+                ? `Attention required! There are ${alertsCount} active safety/utility alerts in your neighborhood today. Check updates below.`
+                : `All quiet around ${currentLocality?.subArea || currentLocality?.name || 'here'} today. There are ${eventsCount} upcoming events and ${discussionsCount} active discussions nearby.`
+            }
+          </div>
+        </div>
+      </div>
+
       {/* Category Tabs Bar */}
       <div className="mt-3.5 px-4 overflow-x-auto no-scrollbar flex items-center gap-2 sticky top-[60px] bg-slate-50/90 backdrop-blur-xs py-1.5 z-20">
         {categories.map((tab) => {
@@ -326,7 +400,7 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-        ) : posts.length === 0 ? (
+        ) : filteredPosts.length === 0 ? (
           <div className="card-premium p-8 text-center space-y-4 mt-4 flex flex-col items-center justify-center">
             <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mb-1">
               <Megaphone size={28} />
@@ -337,7 +411,7 @@ export default function HomePage() {
             </p>
           </div>
         ) : (
-          posts.map((post) => {
+          filteredPosts.map((post) => {
             const hasLiked = likedPosts[post.id];
             const likesCount = likeCounts[post.id] || 0;
             const commentsCount = post.comments?.length || 0;
@@ -508,7 +582,9 @@ export default function HomePage() {
               <MapPin size={18} className="text-brand-green" />
               Select Sub-area
             </h3>
-            <p className="text-slate-400 text-xs mb-4">Select a sub-locality in Badlapur to narrow down posts and updates.</p>
+            <p className="text-slate-400 text-xs mb-4">
+              Select a sub-locality in {currentLocality?.name || 'your area'} to narrow down posts and updates.
+            </p>
 
             <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
               {localities.map((loc) => {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, User as UserIcon, Send, Smile, Paperclip, MoreVertical } from 'lucide-react';
+import { useLocality } from '@/context/LocalityContext';
 
 interface Message {
   id: string;
@@ -70,6 +71,7 @@ const AUTO_REPLIES: Record<string, string[]> = {
 export default function ChatConversationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const { currentLocality } = useLocality();
 
   const [recipient, setRecipient] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -103,14 +105,23 @@ export default function ChatConversationPage({ params }: { params: Promise<{ id:
       try {
         setMessages(JSON.parse(storedMsg));
       } catch {
-        setMessages(SEED_MESSAGES[id] || []);
+        const rawSeed = SEED_MESSAGES[id] || [];
+        const seed = rawSeed.map(msg => ({
+          ...msg,
+          text: msg.text.replace('Badlapur', currentLocality?.name || 'local')
+        }));
+        setMessages(seed);
       }
     } else {
-      const seed = SEED_MESSAGES[id] || [];
+      const rawSeed = SEED_MESSAGES[id] || [];
+      const seed = rawSeed.map(msg => ({
+        ...msg,
+        text: msg.text.replace('Badlapur', currentLocality?.name || 'local')
+      }));
       setMessages(seed);
       localStorage.setItem(`aaspas_messages_${id}`, JSON.stringify(seed));
     }
-  }, [id]);
+  }, [id, currentLocality]);
 
   useEffect(() => {
     // Scroll to bottom
