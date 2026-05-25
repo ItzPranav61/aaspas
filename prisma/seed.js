@@ -23,6 +23,7 @@ async function main() {
 
   console.log("Seeding localities...");
   
+  // Badlapur Localities
   const badlapur = await prisma.locality.create({
     data: {
       name: "Badlapur",
@@ -32,6 +33,7 @@ async function main() {
       pincode: "421503",
       lat: 19.1498,
       lng: 73.2422,
+      groupName: "Badlapur Localities",
     }
   });
 
@@ -44,6 +46,7 @@ async function main() {
       pincode: "421503",
       lat: 19.1550,
       lng: 73.2500,
+      groupName: "Badlapur Localities",
     }
   });
 
@@ -56,6 +59,204 @@ async function main() {
       pincode: "421503",
       lat: 19.1620,
       lng: 73.2380,
+      groupName: "Badlapur Localities",
+    }
+  });
+
+  const kulgaon = await prisma.locality.create({
+    data: {
+      name: "Badlapur",
+      subArea: "Kulgaon",
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421503",
+      lat: 19.1440,
+      lng: 73.2280,
+      groupName: "Badlapur Localities",
+    }
+  });
+
+  const rameshwadi = await prisma.locality.create({
+    data: {
+      name: "Badlapur",
+      subArea: "Rameshwadi",
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421503",
+      lat: 19.1520,
+      lng: 73.2250,
+      groupName: "Badlapur Localities",
+    }
+  });
+
+  const belavali = await prisma.locality.create({
+    data: {
+      name: "Badlapur",
+      subArea: "Belavali",
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421503",
+      lat: 19.1380,
+      lng: 73.2340,
+      groupName: "Badlapur Localities",
+    }
+  });
+
+  const manjarli = await prisma.locality.create({
+    data: {
+      name: "Badlapur",
+      subArea: "Manjarli",
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421503",
+      lat: 19.1650,
+      lng: 73.2200,
+      groupName: "Badlapur Localities",
+    }
+  });
+
+  const badlapurEast = await prisma.locality.create({
+    data: {
+      name: "Badlapur East",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421503",
+      lat: 19.1500,
+      lng: 73.2450,
+      groupName: "Badlapur Localities",
+    }
+  });
+
+  const badlapurWest = await prisma.locality.create({
+    data: {
+      name: "Badlapur West",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421503",
+      lat: 19.1450,
+      lng: 73.2300,
+      groupName: "Badlapur Localities",
+    }
+  });
+
+  // Nearby Areas
+  const ambernath = await prisma.locality.create({
+    data: {
+      name: "Ambernath",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421501",
+      lat: 19.1825,
+      lng: 73.1922,
+      groupName: "Nearby Areas",
+    }
+  });
+
+  const ulhasnagar = await prisma.locality.create({
+    data: {
+      name: "Ulhasnagar",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421001",
+      lat: 19.2215,
+      lng: 73.1644,
+      groupName: "Nearby Areas",
+    }
+  });
+
+  const vithalwadi = await prisma.locality.create({
+    data: {
+      name: "Vithalwadi",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421003",
+      lat: 19.2260,
+      lng: 73.1490,
+      groupName: "Nearby Areas",
+    }
+  });
+
+  const kalyan = await prisma.locality.create({
+    data: {
+      name: "Kalyan",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421301",
+      lat: 19.2402,
+      lng: 73.1302,
+      groupName: "Nearby Areas",
+    }
+  });
+
+  const shahad = await prisma.locality.create({
+    data: {
+      name: "Shahad",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421103",
+      lat: 19.2510,
+      lng: 73.1450,
+      groupName: "Nearby Areas",
+    }
+  });
+
+  const thakurli = await prisma.locality.create({
+    data: {
+      name: "Thakurli",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421201",
+      lat: 19.2240,
+      lng: 73.1040,
+      groupName: "Nearby Areas",
+    }
+  });
+
+  // Central Line Areas
+  const dombivli = await prisma.locality.create({
+    data: {
+      name: "Dombivli",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421202",
+      lat: 19.2183,
+      lng: 73.0878,
+      groupName: "Central Line Areas",
+    }
+  });
+
+  const titwala = await prisma.locality.create({
+    data: {
+      name: "Titwala",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421605",
+      lat: 19.3000,
+      lng: 73.2100,
+      groupName: "Central Line Areas",
+    }
+  });
+
+  const ambivali = await prisma.locality.create({
+    data: {
+      name: "Ambivali",
+      subArea: null,
+      city: "Thane",
+      state: "Maharashtra",
+      pincode: "421102",
+      lat: 19.2800,
+      lng: 73.1700,
+      groupName: "Central Line Areas",
     }
   });
 

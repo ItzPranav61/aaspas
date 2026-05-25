@@ -13,6 +13,7 @@ export interface Locality {
   lat: number | null;
   lng: number | null;
   country: string;
+  groupName: string;
 }
 
 interface LocalityContextType {

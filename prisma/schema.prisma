@@ -15,6 +15,7 @@ model Locality {
   pincode   String
   lat       Float?
   lng       Float?
+  groupName String   @default("Central Line Areas") // e.g. "Nearby Areas", "Badlapur Localities", "Central Line Areas"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

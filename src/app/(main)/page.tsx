@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useLocality } from '@/context/LocalityContext';
+import { useLocality, Locality } from '@/context/LocalityContext';
 import { useRouter } from 'next/navigation';
 import {
   MapPin,
@@ -16,7 +16,9 @@ import {
   Tag,
   Check,
   Megaphone,
-  Share2
+  Share2,
+  Search,
+  X
 } from 'lucide-react';
 
 interface Post {
@@ -72,6 +74,7 @@ export default function HomePage() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
+  const [localitySearch, setLocalitySearch] = useState('');
 
   const fetchPosts = useCallback(async () => {
     if (!currentLocality) return;
@@ -110,6 +113,49 @@ export default function HomePage() {
     const catParam = catObj ? catObj.value : 'all';
     return post.category === catParam;
   });
+
+  const filteredLocalities = localities.filter((loc) => {
+    const term = localitySearch.toLowerCase().trim();
+    if (!term) return true;
+    return (
+      loc.name.toLowerCase().includes(term) ||
+      (loc.subArea && loc.subArea.toLowerCase().includes(term)) ||
+      loc.pincode.includes(term)
+    );
+  });
+
+  const nearbyAreas = filteredLocalities.filter((loc) => loc.groupName === 'Nearby Areas');
+  const badlapurLocalities = filteredLocalities.filter((loc) => loc.groupName === 'Badlapur Localities');
+  const centralLineAreas = filteredLocalities.filter((loc) => loc.groupName === 'Central Line Areas');
+
+  const renderLocalityItem = (loc: Locality) => {
+    const isSelected = currentLocality?.id === loc.id;
+    return (
+      <button
+        key={loc.id}
+        onClick={() => {
+          selectLocality(loc.id);
+          setIsLocalitySheetOpen(false);
+          setLocalitySearch('');
+        }}
+        className={`w-full p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
+          isSelected
+            ? 'bg-emerald-50 border-brand-green text-brand-deep font-bold shadow-xs'
+            : 'border-slate-100 hover:border-slate-200 bg-slate-50/50 text-slate-700 font-semibold'
+        }`}
+      >
+        <div>
+          <span className="text-xs font-bold block">
+            {loc.subArea ? `${loc.subArea}, ` : ''} {loc.name}
+          </span>
+          <p className="text-[9px] text-slate-400 font-normal mt-0.5">
+            Pincode: {loc.pincode} • {loc.city}, {loc.state}
+          </p>
+        </div>
+        {isSelected && <Check size={14} className="text-brand-green" />}
+      </button>
+    );
+  };
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -572,48 +618,87 @@ export default function HomePage() {
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
-            onClick={() => setIsLocalitySheetOpen(false)}
+            onClick={() => {
+              setIsLocalitySheetOpen(false);
+              setLocalitySearch('');
+            }}
           ></div>
 
           {/* Sheet */}
-          <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl p-6 z-50 animate-slide-up">
-            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
-            <h3 className="text-lg font-black text-slate-800 mb-1 flex items-center gap-1.5">
-              <MapPin size={18} className="text-brand-green" />
-              Select Sub-area
-            </h3>
-            <p className="text-slate-400 text-xs mb-4">
-              Select a sub-locality in {currentLocality?.name || 'your area'} to narrow down posts and updates.
-            </p>
+          <div className="relative w-full max-w-md bg-white rounded-t-3xl shadow-2xl p-6 z-50 animate-slide-up flex flex-col max-h-[85vh]">
+            <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 shrink-0"></div>
+            <div className="text-left mb-4 shrink-0">
+              <h3 className="text-lg font-black text-slate-800 mb-1 flex items-center gap-1.5">
+                <MapPin size={18} className="text-brand-green" />
+                Select Your Area
+              </h3>
+              <p className="text-slate-450 text-[11px] leading-normal">
+                Choose your locality to see nearby posts, alerts, services, and groups.
+              </p>
+            </div>
 
-            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-              {localities.map((loc) => {
-                const isSelected = currentLocality?.id === loc.id;
-                return (
-                  <button
-                    key={loc.id}
-                    onClick={() => {
-                      selectLocality(loc.id);
-                      setIsLocalitySheetOpen(false);
-                    }}
-                    className={`w-full p-3.5 rounded-xl border text-left flex items-center justify-between transition-all ${
-                      isSelected
-                        ? 'bg-emerald-50 border-brand-green text-brand-deep font-bold shadow-xs'
-                        : 'border-slate-100 hover:border-slate-200 bg-slate-50/50 text-slate-700 font-semibold'
-                    }`}
-                  >
-                    <div>
-                      <span className="text-sm">
-                        {loc.subArea ? `${loc.subArea}, ` : ''} {loc.name}
-                      </span>
-                      <p className="text-[10px] text-slate-400 font-normal mt-0.5">
-                        Pincode: {loc.pincode} • {loc.city}, {loc.state}
-                      </p>
-                    </div>
-                    {isSelected && <Check size={16} className="text-brand-green" />}
-                  </button>
-                );
-              })}
+            {/* Search Input Box */}
+            <div className="relative mb-4 shrink-0">
+              <input
+                type="text"
+                placeholder="Search area, station, society..."
+                value={localitySearch}
+                onChange={(e) => setLocalitySearch(e.target.value)}
+                className="w-full pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-brand-green/20 focus:border-brand-green text-slate-800 font-semibold"
+              />
+              <Search className="absolute left-3 top-3.5 text-slate-400" size={13} />
+              {localitySearch && (
+                <button
+                  onClick={() => setLocalitySearch('')}
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-4 overflow-y-auto pr-1 flex-1 no-scrollbar pb-6">
+              {/* Badlapur Localities */}
+              {badlapurLocalities.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-black text-brand-deep uppercase tracking-wider text-left pl-1 bg-emerald-50/50 py-1 px-2 rounded-md">
+                    Badlapur Localities
+                  </h4>
+                  <div className="space-y-1.5">
+                    {badlapurLocalities.map((loc) => renderLocalityItem(loc))}
+                  </div>
+                </div>
+              )}
+
+              {/* Nearby Areas */}
+              {nearbyAreas.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-black text-brand-deep uppercase tracking-wider text-left pl-1 bg-emerald-50/50 py-1 px-2 rounded-md">
+                    Nearby Areas
+                  </h4>
+                  <div className="space-y-1.5">
+                    {nearbyAreas.map((loc) => renderLocalityItem(loc))}
+                  </div>
+                </div>
+              )}
+
+              {/* Central Line Areas */}
+              {centralLineAreas.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-black text-brand-deep uppercase tracking-wider text-left pl-1 bg-emerald-50/50 py-1 px-2 rounded-md">
+                    Central Line Areas
+                  </h4>
+                  <div className="space-y-1.5">
+                    {centralLineAreas.map((loc) => renderLocalityItem(loc))}
+                  </div>
+                </div>
+              )}
+
+              {filteredLocalities.length === 0 && (
+                <div className="text-center py-8 text-slate-400 text-xs font-semibold">
+                  🔍 No matching localities found.
+                </div>
+              )}
             </div>
           </div>
         </div>
